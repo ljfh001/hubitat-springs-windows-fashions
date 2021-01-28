@@ -35,13 +35,13 @@ metadata {
         capability "HealthCheck"
         capability "Actuator"
         capability "Sensor"
+        capability "SwitchLevel"
+        capability "ChangeLevel"
 
         command "stop"
         command "home"
 
-        capability "Switch Level"
-
-        fingerprint inClusters:"0x5E,0x26,0x85,0x59,0x72,0x86,0x5A,0x73,0x7A,0x6C,0x55,0x80", mfr: "026E", deviceId: "5A31", prod: "5253", deviceJoinName: "Springs Window Fashions - Blinds"
+        fingerprint inClusters:"0x5E,0x26,0x85,0x59,0x72,0x86,0x5A,0x73,0x7A,0x6C,0x55,0x80", mfr: "026E", deviceId: "5A31", prod: "5253", deviceJoinName: "Springs Window Fashions - Shades"
     }
 
     preferences {
@@ -212,9 +212,21 @@ def presetPosition() {
     zwave.switchMultilevelV1.switchMultilevelSet(value: 0xFF).format()
 }
 
+String startLevelChange(direction){
+    Integer upDown = direction == "down" ? 1 : 0
+    return zwave.switchMultilevelV1.switchMultilevelStartLevelChange(upDown: upDown, ignoreStartLevel: 1, startLevel: 0).format()
+}
+
+List<String> stopLevelChange(){
+    return [
+        zwave.switchMultilevelV3.switchMultilevelStopLevelChange().format(),
+        "delay 200",
+        zwave.basicV1.basicGet().format()
+    ]
+}
+
 def stop() {
-    if (logEnable) log.debug "Stop Command Issued"
-    zwave.switchMultilevelV3.switchMultilevelStopLevelChange().format()
+    stopLevelChange()
 }
 
 def home() {
